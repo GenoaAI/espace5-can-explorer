@@ -40,12 +40,16 @@ class TestEspace5UdsScanner(unittest.TestCase):
         self.assertEqual(easylink_res.vin, "VF1RFC00X66002021")
         self.assertEqual(easylink_res.part_number, "283C36016R")
         self.assertEqual(easylink_res.sw_version, "283C36016R")
+        self.assertEqual(easylink_res.programming_date, "2024-03-14")
+        self.assertEqual(easylink_res.identifications["F198"].decoded, "OTA_RENAULT_FOTA")
 
         # Scan Injection 2.0 Blue dCi (0x7E0 -> 0x7E8)
         ecm_res = scanner.scan_single_ecu(ECU_BY_KEY["ecm"])
         self.assertTrue(ecm_res.online)
         self.assertEqual(ecm_res.supplier, "BOSCH")
         self.assertEqual(ecm_res.part_number, "237104892R")
+        self.assertEqual(ecm_res.programming_date, "2023-09-22")
+        self.assertEqual(ecm_res.identifications["F18B"].decoded, "2020-11-18")
 
 
 if __name__ == "__main__":

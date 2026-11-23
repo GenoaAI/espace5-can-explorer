@@ -111,6 +111,9 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F195": b"237105521R",
                 "F188": b"237615521R",
                 "F18C": b"BMD1CS0069941",
+                "F18B": bytes.fromhex("20201118"),
+                "F198": b"CLIP_FR_75015",
+                "F199": bytes.fromhex("20230922"),
                 "F1A0": bytes.fromhex("54"),
             },
             # Boîte Auto EDC DW6 (Getrag 6DCT450)
@@ -122,6 +125,9 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F194": b"DW6_P2_V18",
                 "F195": b"310322105R",
                 "F18C": b"GT6DCT4502841",
+                "F18B": bytes.fromhex("20201112"),
+                "F198": b"FACTORY_DOUAI",
+                "F199": bytes.fromhex("20201204"),
                 "F1A0": bytes.fromhex("1C"),
             },
             # Module AdBlue SCR
@@ -130,6 +136,9 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F187": b"208993104R",
                 "F18A": b"BOSCH_SCR",
                 "F195": b"208994412R",
+                "F18B": bytes.fromhex("20201110"),
+                "F198": b"CLIP_FR_75015",
+                "F199": bytes.fromhex("20230922"),
                 "F1A0": bytes.fromhex("08"),
             },
             # Système Multimédia Easy Link 9.3" (Bosch A-IVI)
@@ -143,6 +152,9 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F195": b"283C36016R",
                 "F188": b"283C62148R",
                 "F18C": b"AIVI93FR2021884",
+                "F18B": bytes.fromhex("20201115"),
+                "F198": b"OTA_RENAULT_FOTA",
+                "F199": bytes.fromhex("20240314"),
                 "F1A0": bytes.fromhex("2A"),
             },
             # Tableau de Bord Numérique TFT
@@ -152,6 +164,8 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F18A": b"VISTEON",
                 "F191": b"248104110R",
                 "F195": b"248109981R",
+                "F18B": bytes.fromhex("20201109"),
+                "F199": bytes.fromhex("20201204"),
                 "F1A0": bytes.fromhex("19"),
             },
             # Unité Centrale Habitacle (UCH / BCM)

@@ -1,6 +1,6 @@
 # Rapport d'Exploration CAN / UDS - Renault Espace V Phase 2 (2.0 Blue dCi & Easy Link)
 
-- **Date du scan** : `2026-11-23 14:48:59`
+- **Date du scan** : `2026-11-23 15:43:19`
 - **Interface** : `ELM327 v2.2 (Vgate iCar Pro BLE)` (SIMULATION ESPACE V 2.0 Blue dCi)
 - **Tension Batterie 12V (ESM)** : `14.3V`
 - **VIN détecté (DID F190)** : `VF1RFC00X66002021`
@@ -8,26 +8,26 @@
 
 ## Synthèse des Calculateurs (ECUs)
 
-| Code | Calculateur | TX/RX | Statut | Réf. Pièce (F187) | Version Logicielle (F195) | Fournisseur (F18A) |
-|---|---|---|---|---|---|---|
-| **ECM / INJ** | Injection Moteur 2.0 Blue dCi (M9R) | `7E0`/`7E8` | EN LIGNE | `237104892R` | `237105521R` | BOSCH |
-| **TCM / BVA** | Boîte Automatique EDC 6 rapports (DW6) | `7E1`/`7E9` | EN LIGNE | `310321984R` | `310322105R` | GETRAG |
-| **UDM / SCR** | Module Dépollution AdBlue (SCR) | `7E2`/`7EA` | EN LIGNE | `208993104R` | `208994412R` | BOSCH_SCR |
-| **A-IVI / RadNav** | Système Multimédia Easy Link 9.3" | `712`/`732` | EN LIGNE | `283C36016R` | `283C36016R` | BOSCH_AIVI |
-| **TDB / METER** | Tableau de Bord Numérique (Cockpit) | `743`/`763` | EN LIGNE | `248109452R` | `248109981R` | VISTEON |
-| **UCH / BCM** | Unité Centrale Habitacle (BCM) | `745`/`765` | EN LIGNE | `284B17512R` | `284B18821R` | CONTI_BCM |
-| **4WS / 4CONTROL** | Châssis 4 Roues Directrices (4Control) | `784`/`7A4` | EN LIGNE | `555014829R` | `555016011R` | AISIN_4WS |
-| **AVS / SUSP** | Amortissement Piloté | `781`/`7A1` | EN LIGNE | `543028194R` | `543029004R` | KYB_AVS |
-| **ABS / VDC / ESC** | Freinage ABS / ESP / Contrôle Trajectoire | `740`/`760` | EN LIGNE | `476607841R` | `476608912R` | ATE_CONTI |
-| **DAE / EPS** | Direction Assistée Électrique | `742`/`762` | EN LIGNE | `491105612R` | `491106109R` | JTEKT |
-| **CLIM / HVAC** | Climatisation Automatique | `744`/`764` | EN LIGNE | `275104821R` | `275105190R` | VALEO |
-| **AIRBAG / SRS** | Calculateur Airbags & Prétensionneurs | `752`/`772` | Hors ligne / Non équipé | - | - | Autoliv / Continental |
-| **FPA / EPB** | Frein de Parking Assisté Électrique | `755`/`775` | Hors ligne / Non équipé | - | - | TRW /ZF |
-| **UPC / USM** | Unité de Protection et de Commutation (Compartiment Moteur) | `74D`/`76D` | Hors ligne / Non équipé | - | - | Continental |
-| **AAU / AMP** | Amplificateur Audio Externe (Bose Surround) | `782`/`7A2` | EN LIGNE | `280634192R` | `280635011R` | BOSE_DSP |
-| **FCAM / ADAS** | Caméra Frontale ADAS (Pare-brise) | `74B`/`76B` | EN LIGNE | `284G26182R` | `284G27901R` | VALEO_MOBILEYE |
-| **FRAD / ACC** | Radar Frontal Régulateur Adaptatif (ACC) | `753`/`773` | EN LIGNE | `284387412R` | `284388109R` | BOSCH_FRAD |
-| **HFM** | Module Mains-Libres (Accès & Démarrage) | `792`/`7B2` | Hors ligne / Non équipé | - | - | Continental |
+| Code | Calculateur | TX/RX | Statut | Réf. Pièce (F187) | Version Logicielle (F195) | Dernière Prog. (F199) | Fournisseur (F18A) |
+|---|---|---|---|---|---|---|---|
+| **ECM / INJ** | Injection Moteur 2.0 Blue dCi (M9R) | `7E0`/`7E8` | EN LIGNE | `237104892R` | `237105521R` | `2023-09-22` | BOSCH |
+| **TCM / BVA** | Boîte Automatique EDC 6 rapports (DW6) | `7E1`/`7E9` | EN LIGNE | `310321984R` | `310322105R` | `2020-12-04` | GETRAG |
+| **UDM / SCR** | Module Dépollution AdBlue (SCR) | `7E2`/`7EA` | EN LIGNE | `208993104R` | `208994412R` | `2023-09-22` | BOSCH_SCR |
+| **A-IVI / RadNav** | Système Multimédia Easy Link 9.3" | `712`/`732` | EN LIGNE | `283C36016R` | `283C36016R` | `2024-03-14` | BOSCH_AIVI |
+| **TDB / METER** | Tableau de Bord Numérique (Cockpit) | `743`/`763` | EN LIGNE | `248109452R` | `248109981R` | `2020-12-04` | VISTEON |
+| **UCH / BCM** | Unité Centrale Habitacle (BCM) | `745`/`765` | EN LIGNE | `284B17512R` | `284B18821R` | - | CONTI_BCM |
+| **4WS / 4CONTROL** | Châssis 4 Roues Directrices (4Control) | `784`/`7A4` | EN LIGNE | `555014829R` | `555016011R` | - | AISIN_4WS |
+| **AVS / SUSP** | Amortissement Piloté | `781`/`7A1` | EN LIGNE | `543028194R` | `543029004R` | - | KYB_AVS |
+| **ABS / VDC / ESC** | Freinage ABS / ESP / Contrôle Trajectoire | `740`/`760` | EN LIGNE | `476607841R` | `476608912R` | - | ATE_CONTI |
+| **DAE / EPS** | Direction Assistée Électrique | `742`/`762` | EN LIGNE | `491105612R` | `491106109R` | - | JTEKT |
+| **CLIM / HVAC** | Climatisation Automatique | `744`/`764` | EN LIGNE | `275104821R` | `275105190R` | - | VALEO |
+| **AIRBAG / SRS** | Calculateur Airbags & Prétensionneurs | `752`/`772` | Hors ligne / Non équipé | - | - | - | Autoliv / Continental |
+| **FPA / EPB** | Frein de Parking Assisté Électrique | `755`/`775` | Hors ligne / Non équipé | - | - | - | TRW /ZF |
+| **UPC / USM** | Unité de Protection et de Commutation (Compartiment Moteur) | `74D`/`76D` | Hors ligne / Non équipé | - | - | - | Continental |
+| **AAU / AMP** | Amplificateur Audio Externe (Bose Surround) | `782`/`7A2` | EN LIGNE | `280634192R` | `280635011R` | - | BOSE_DSP |
+| **FCAM / ADAS** | Caméra Frontale ADAS (Pare-brise) | `74B`/`76B` | EN LIGNE | `284G26182R` | `284G27901R` | - | VALEO_MOBILEYE |
+| **FRAD / ACC** | Radar Frontal Régulateur Adaptatif (ACC) | `753`/`773` | EN LIGNE | `284387412R` | `284388109R` | - | BOSCH_FRAD |
+| **HFM** | Module Mains-Libres (Accès & Démarrage) | `792`/`7B2` | Hors ligne / Non équipé | - | - | - | Continental |
 
 ## Détails UDS par Calculateur (Service 0x22 ReadDataByIdentifier)
 
@@ -43,6 +43,9 @@
   - **DID `0xF195` (Version Logicielle (Software Version))** : `237105521R` *(Hex: `32333731303535323152`)*
   - **DID `0xF188` (Calibration / Configuration Logicielle Renault)** : `237615521R` *(Hex: `32333736313535323152`)*
   - **DID `0xF18C` (Numéro de Série Calculateur (ECU Serial))** : `BMD1CS0069941` *(Hex: `424D4431435330303639393431`)*
+  - **DID `0xF18B` (Date de Fabrication Calculateur (Manufacturing Date))** : `2020-11-18` *(Hex: `20201118`)*
+  - **DID `0xF198` (Code Atelier / Outil Garage (Repair Shop / Tester Serial))** : `CLIP_FR_75015` *(Hex: `434C49505F46525F3735303135`)*
+  - **DID `0xF199` (Date de Dernière Reprogrammation (Programming Date))** : `2023-09-22` *(Hex: `20230922`)*
   - **DID `0xF1A0` (Variante Diagnostic Renault (DiagVersion))** : `54` *(Hex: `54`)*
 
 ### [TCM / BVA] Boîte Automatique EDC 6 rapports (DW6) (`TX: 0x7E1` / `RX: 0x7E9`)
@@ -55,6 +58,9 @@
   - **DID `0xF194` (Référence Logicielle (Software Number))** : `DW6_P2_V18` *(Hex: `4457365F50325F563138`)*
   - **DID `0xF195` (Version Logicielle (Software Version))** : `310322105R` *(Hex: `33313033323231303552`)*
   - **DID `0xF18C` (Numéro de Série Calculateur (ECU Serial))** : `GT6DCT4502841` *(Hex: `47543644435434353032383431`)*
+  - **DID `0xF18B` (Date de Fabrication Calculateur (Manufacturing Date))** : `2020-11-12` *(Hex: `20201112`)*
+  - **DID `0xF198` (Code Atelier / Outil Garage (Repair Shop / Tester Serial))** : `FACTORY_DOUAI` *(Hex: `464143544F52595F444F554149`)*
+  - **DID `0xF199` (Date de Dernière Reprogrammation (Programming Date))** : `2020-12-04` *(Hex: `20201204`)*
   - **DID `0xF1A0` (Variante Diagnostic Renault (DiagVersion))** : `1C` *(Hex: `1C`)*
 
 ### [UDM / SCR] Module Dépollution AdBlue (SCR) (`TX: 0x7E2` / `RX: 0x7EA`)
@@ -64,6 +70,9 @@
   - **DID `0xF187` (Référence Pièce Renault (Part Number))** : `208993104R` *(Hex: `32303839393331303452`)*
   - **DID `0xF18A` (Fournisseur Système (Supplier ID))** : `BOSCH_SCR` *(Hex: `424F5343485F534352`)*
   - **DID `0xF195` (Version Logicielle (Software Version))** : `208994412R` *(Hex: `32303839393434313252`)*
+  - **DID `0xF18B` (Date de Fabrication Calculateur (Manufacturing Date))** : `2020-11-10` *(Hex: `20201110`)*
+  - **DID `0xF198` (Code Atelier / Outil Garage (Repair Shop / Tester Serial))** : `CLIP_FR_75015` *(Hex: `434C49505F46525F3735303135`)*
+  - **DID `0xF199` (Date de Dernière Reprogrammation (Programming Date))** : `2023-09-22` *(Hex: `20230922`)*
   - **DID `0xF1A0` (Variante Diagnostic Renault (DiagVersion))** : `08` *(Hex: `08`)*
 
 ### [A-IVI / RadNav] Système Multimédia Easy Link 9.3" (`TX: 0x712` / `RX: 0x732`)
@@ -78,6 +87,9 @@
   - **DID `0xF195` (Version Logicielle (Software Version))** : `283C36016R` *(Hex: `32383343333630313652`)*
   - **DID `0xF188` (Calibration / Configuration Logicielle Renault)** : `283C62148R` *(Hex: `32383343363231343852`)*
   - **DID `0xF18C` (Numéro de Série Calculateur (ECU Serial))** : `AIVI93FR2021884` *(Hex: `414956493933465232303231383834`)*
+  - **DID `0xF18B` (Date de Fabrication Calculateur (Manufacturing Date))** : `2020-11-15` *(Hex: `20201115`)*
+  - **DID `0xF198` (Code Atelier / Outil Garage (Repair Shop / Tester Serial))** : `OTA_RENAULT_FOTA` *(Hex: `4F54415F52454E41554C545F464F5441`)*
+  - **DID `0xF199` (Date de Dernière Reprogrammation (Programming Date))** : `2024-03-14` *(Hex: `20240314`)*
   - **DID `0xF1A0` (Variante Diagnostic Renault (DiagVersion))** : `2A` *(Hex: `2A`)*
 
 ### [TDB / METER] Tableau de Bord Numérique (Cockpit) (`TX: 0x743` / `RX: 0x763`)
@@ -88,6 +100,8 @@
   - **DID `0xF18A` (Fournisseur Système (Supplier ID))** : `VISTEON` *(Hex: `56495354454F4E`)*
   - **DID `0xF191` (Référence Matérielle (Hardware Number))** : `248104110R` *(Hex: `32343831303431313052`)*
   - **DID `0xF195` (Version Logicielle (Software Version))** : `248109981R` *(Hex: `32343831303939383152`)*
+  - **DID `0xF18B` (Date de Fabrication Calculateur (Manufacturing Date))** : `2020-11-09` *(Hex: `20201109`)*
+  - **DID `0xF199` (Date de Dernière Reprogrammation (Programming Date))** : `2020-12-04` *(Hex: `20201204`)*
   - **DID `0xF1A0` (Variante Diagnostic Renault (DiagVersion))** : `19` *(Hex: `19`)*
 
 ### [UCH / BCM] Unité Centrale Habitacle (BCM) (`TX: 0x745` / `RX: 0x765`)

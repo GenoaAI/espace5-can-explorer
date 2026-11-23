@@ -43,17 +43,18 @@ def format_markdown_report(
         "",
         "## Synthèse des Calculateurs (ECUs)",
         "",
-        "| Code | Calculateur | TX/RX | Statut | Réf. Pièce (F187) | Version Logicielle (F195) | Fournisseur (F18A) |",
-        "|---|---|---|---|---|---|---|",
+        "| Code | Calculateur | TX/RX | Statut | Réf. Pièce (F187) | Version Logicielle (F195) | Dernière Prog. (F199) | Fournisseur (F18A) |",
+        "|---|---|---|---|---|---|---|---|",
     ]
 
     for r in results:
         status = "EN LIGNE" if r.online else "Hors ligne / Non équipé"
         part = f"`{r.part_number}`" if r.part_number else "-"
         sw = f"`{r.sw_version}`" if r.sw_version else "-"
+        prog = f"`{r.programming_date}`" if r.programming_date else "-"
         sup = r.supplier if r.online else r.supplier_hint
         lines.append(
-            f"| **{r.code_renault}** | {r.name} | `{r.tx_id}`/`{r.rx_id}` | {status} | {part} | {sw} | {sup} |"
+            f"| **{r.code_renault}** | {r.name} | `{r.tx_id}`/`{r.rx_id}` | {status} | {part} | {sw} | {prog} | {sup} |"
         )
 
     lines.extend(["", "## Détails UDS par Calculateur (Service 0x22 ReadDataByIdentifier)", ""])
@@ -85,26 +86,27 @@ def print_console_summary(
     vins = sorted({r.vin for r in online_ecus if r.vin})
     vehicle_vin = vins[0] if vins else "N/A"
 
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 114)
     print(" RENAULT ESPACE V (PHASE 2 - 2.0 Blue dCi & EASY LINK) - EXPLORATEUR CAN / UDS (ISO-14229)")
-    print("=" * 100)
+    print("=" * 114)
     print(f" Interface : {adapter_name} [{mode_label}]")
     print(f" Batterie  : {voltage:<12} | VIN (F190) : {vehicle_vin:<20} | ECUs en ligne : {len(online_ecus)}/{len(results)}")
-    print("-" * 100)
-    header = f" {'CLÉ':<9} | {'CODE RENAULT':<14} | {'TX/RX':<7} | {'STATUT':<10} | {'RÉF. PIÈCE':<12} | {'VERSION SW':<14} | {'FOURNISSEUR'}"
+    print("-" * 114)
+    header = f" {'CLÉ':<9} | {'CODE RENAULT':<14} | {'TX/RX':<7} | {'STATUT':<8} | {'RÉF. PIÈCE':<11} | {'VERSION SW':<11} | {'DATE PROG.':<10} | {'FOURNISSEUR'}"
     print(header)
-    print("-" * 100)
+    print("-" * 114)
 
     for r in results:
         status = "EN LIGNE" if r.online else "ABSENT"
         part = r.part_number or "-"
         sw = r.sw_version or "-"
+        prog = r.programming_date or "-"
         sup = r.supplier if r.online else r.supplier_hint
         print(
-            f" {r.key:<9} | {r.code_renault:<14} | {r.tx_id}/{r.rx_id} | {status:<10} | {part:<12} | {sw:<14} | {sup}"
+            f" {r.key:<9} | {r.code_renault:<14} | {r.tx_id}/{r.rx_id} | {status:<8} | {part:<11} | {sw:<11} | {prog:<10} | {sup}"
         )
 
-    print("=" * 100)
+    print("=" * 114)
 
     # Zoom spécial sur le système multimédia Easy Link (A-IVI) s'il a répondu
     easylink = next((r for r in online_ecus if r.key == "easylink"), None)

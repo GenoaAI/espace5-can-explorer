@@ -60,22 +60,44 @@ class EcuScanResult:
         val = self.identifications.get("F191")
         return val.decoded if val else ""
 
+    @property
+    def programming_date(self) -> str:
+        val = self.identifications.get("F199") or self.identifications.get("F18B")
+        return val.decoded if val else ""
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 
 def decode_did_bytes(data: bytes, encoding: str = "ascii") -> str:
-    """Décode proprement la charge utile d'un DID Renault (ASCII imprimable ou Hex)."""
+    """Décode proprement la charge utile d'un DID Renault (ASCII imprimable, Date BCD ou Hex)."""
     if not data:
         return ""
     if encoding == "hex":
         return data.hex().upper()
 
-    # Vérifie si les octets sont majoritairement des caractères ASCII imprimables
     cleaned = data.strip(b"\x00\xff ")
     if not cleaned:
         return data.hex().upper()
 
+    if encoding == "date_bcd":
+        # Si c'est déjà une date ASCII (ex: b"20210615" ou b"2021-06-15")
+        if all(32 <= b <= 126 for b in cleaned) and len(cleaned) in (6, 8, 10):
+            txt = cleaned.decode("ascii", errors="ignore").strip()
+            if len(txt) == 8 and txt.isdigit():
+                return f"{txt[0:4]}-{txt[4:6]}-{txt[6:8]}"
+            if len(txt) == 6 and txt.isdigit():
+                return f"20{txt[0:2]}-{txt[2:4]}-{txt[4:6]}"
+            return txt
+        # Format BCD Renault/ISO sur 4 octets (ex: 0x20 0x23 0x11 0x14 -> 2023-11-14)
+        hx = data.hex().upper()
+        if len(data) == 4 and hx.isdigit():
+            return f"{hx[0:4]}-{hx[4:6]}-{hx[6:8]}"
+        # Format BCD sur 3 octets (AA MM JJ, ex: 0x23 0x11 0x14 -> 2023-11-14)
+        if len(data) == 3 and hx.isdigit():
+            return f"20{hx[0:2]}-{hx[2:4]}-{hx[4:6]}"
+
+    # Vérifie si les octets sont majoritairement des caractères ASCII imprimables
     printable_count = sum(1 for b in cleaned if 32 <= b <= 126)
     if printable_count / len(cleaned) >= 0.75:
         return "".join(chr(b) if 32 <= b <= 126 else "." for b in cleaned).strip()

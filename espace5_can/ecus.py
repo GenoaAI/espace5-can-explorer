@@ -256,6 +256,24 @@ STANDARD_IDENTIFICATION_DIDS: List[DidDefinition] = [
         description="Numéro de série unitaire usine du calculateur",
     ),
     DidDefinition(
+        did="F18B",
+        label="Date de Fabrication Calculateur (Manufacturing Date)",
+        encoding="date_bcd",
+        description="Date de production usine du calculateur (BCD ou ASCII AAAA-MM-JJ)",
+    ),
+    DidDefinition(
+        did="F198",
+        label="Code Atelier / Outil Garage (Repair Shop / Tester Serial)",
+        encoding="ascii",
+        description="Identifiant de l'outil concessionnaire (CAN Clip / Alliance) ayant programmé le calculateur",
+    ),
+    DidDefinition(
+        did="F199",
+        label="Date de Dernière Reprogrammation (Programming Date)",
+        encoding="date_bcd",
+        description="Date de la dernière mise à jour logicielle (flash) en atelier ou usine",
+    ),
+    DidDefinition(
         did="F1A0",
         label="Variante Diagnostic Renault (DiagVersion)",
         encoding="hex",
