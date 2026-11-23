@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+reports/*.json
+reports/*.md
+!reports/EXAMPLE_SIMULATION.md
+.DS_Store
