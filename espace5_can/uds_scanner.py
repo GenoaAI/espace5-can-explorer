@@ -52,7 +52,7 @@ class EcuScanResult:
 
     @property
     def sw_version(self) -> str:
-        val = self.identifications.get("F195") or self.identifications.get("F194")
+        val = self.identifications.get("F188") or self.identifications.get("F195") or self.identifications.get("F194")
         return val.decoded if val else ""
 
     @property
@@ -81,7 +81,6 @@ def decode_did_bytes(data: bytes, encoding: str = "ascii") -> str:
         return data.hex().upper()
 
     if encoding == "date_bcd":
-        # Si c'est déjà une date ASCII (ex: b"20210615" ou b"2021-06-15")
         if all(32 <= b <= 126 for b in cleaned) and len(cleaned) in (6, 8, 10):
             txt = cleaned.decode("ascii", errors="ignore").strip()
             if len(txt) == 8 and txt.isdigit():
@@ -89,15 +88,12 @@ def decode_did_bytes(data: bytes, encoding: str = "ascii") -> str:
             if len(txt) == 6 and txt.isdigit():
                 return f"20{txt[0:2]}-{txt[2:4]}-{txt[4:6]}"
             return txt
-        # Format BCD Renault/ISO sur 4 octets (ex: 0x20 0x23 0x11 0x14 -> 2023-11-14)
         hx = data.hex().upper()
         if len(data) == 4 and hx.isdigit():
             return f"{hx[0:4]}-{hx[4:6]}-{hx[6:8]}"
-        # Format BCD sur 3 octets (AA MM JJ, ex: 0x23 0x11 0x14 -> 2023-11-14)
         if len(data) == 3 and hx.isdigit():
             return f"20{hx[0:2]}-{hx[2:4]}-{hx[4:6]}"
 
-    # Vérifie si les octets sont majoritairement des caractères ASCII imprimables
     printable_count = sum(1 for b in cleaned if 32 <= b <= 126)
     if printable_count / len(cleaned) >= 0.75:
         return "".join(chr(b) if 32 <= b <= 126 else "." for b in cleaned).strip()
@@ -106,39 +102,59 @@ def decode_did_bytes(data: bytes, encoding: str = "ascii") -> str:
 
 
 class Espace5UdsScanner:
-    """Orchestrateur d'initialisation Vgate iCar Pro BLE et d'exploration UDS CAN 500 kbps."""
+    """Orchestrateur d'initialisation Vgate iCar Pro BLE et d'exploration UDS CAN 500 kbps (29-bit + 11-bit)."""
 
     def __init__(self, adapter: BaseAdapter) -> None:
         self.adapter = adapter
         self.adapter_name: str = ""
         self.battery_voltage: str = ""
+        self._active_can_bits: int = 0
 
     def initialize_vgate(self) -> Tuple[str, str]:
-        """Initialise le Vgate iCar Pro BLE en CAN 11-bit 500 kbps (ISO 15765-4)."""
+        """Initialise le Vgate iCar Pro BLE en CAN 500 kbps (ISO 15765-4)."""
         self.adapter_name = self.adapter.send_command("ATZ", timeout=2.0).strip()
         init_sequence = [
             "ATE0",     # Désactive l'écho
             "ATL0",     # Désactive les sauts de ligne superflus
-            "ATS1",     # Conserve les espaces entre octets hexadécimaux pour un parsing sûr
+            "ATS1",     # Conserve les espaces entre octets hexadécimaux
             "ATH0",     # Masque l'en-tête CAN dans la réponse pour isoler l'ISO-TP
-            "ATSP6",    # Protocole 6 : ISO 15765-4 CAN (11 bit ID, 500 kbaud) - Standard Renault Espace 5
+            "ATSP7",    # Démarre en Protocole 7 : ISO 15765-4 CAN (29 bit ID, 500 kbaud)
             "ATCAF0",   # Désactive le formatage auto pour gérer les trames UDS multi-octets proprement
             "ATST32",   # Timeout d'attente CAN ~200 ms
         ]
         for cmd in init_sequence:
             self.adapter.send_command(cmd)
+        self._active_can_bits = 29
 
         self.battery_voltage = self.adapter.send_command("ATRV").strip()
         return self.adapter_name, self.battery_voltage
 
     def select_ecu(self, ecu: EcuDefinition) -> None:
-        """Configure l'adressage physique TX/RX et le Flow Control ISO-TP pour un calculateur donné."""
-        self.adapter.send_command(f"ATSH{ecu.tx_id}")
-        self.adapter.send_command(f"ATCRA{ecu.rx_id}")
-        # Configure le Flow Control ISO-TP avec l'adresse TX du calculateur cible
-        self.adapter.send_command(f"ATFCSH{ecu.tx_id}")
-        self.adapter.send_command("ATFCSD300000")
-        self.adapter.send_command("ATFCSM1")
+        """Configure dynamiquement le protocole 29-bit (ATSP7) ou 11-bit (ATSP6) et l'adressage TX/RX."""
+        if ecu.can_bits == 29:
+            if self._active_can_bits != 29:
+                self.adapter.send_command("ATSP7")
+                self.adapter.send_command("ATCAF0")
+                self._active_can_bits = 29
+            # Sur ELM327 en 29-bit (ex: 18DA10F1), ATCP définit l'octet de priorité (18) et ATSH les 3 octets suivants (DA10F1)
+            cp_byte = ecu.tx_id[:2]
+            sh_bytes = ecu.tx_id[2:]
+            self.adapter.send_command(f"ATCP{cp_byte}")
+            self.adapter.send_command(f"ATSH{sh_bytes}")
+            self.adapter.send_command(f"ATCRA{ecu.rx_id}")
+            self.adapter.send_command(f"ATFCSH{ecu.tx_id}")
+            self.adapter.send_command("ATFCSD300000")
+            self.adapter.send_command("ATFCSM1")
+        else:
+            if self._active_can_bits != 11:
+                self.adapter.send_command("ATSP6")
+                self.adapter.send_command("ATCAF0")
+                self._active_can_bits = 11
+            self.adapter.send_command(f"ATSH{ecu.tx_id}")
+            self.adapter.send_command(f"ATCRA{ecu.rx_id}")
+            self.adapter.send_command(f"ATFCSH{ecu.tx_id}")
+            self.adapter.send_command("ATFCSD300000")
+            self.adapter.send_command("ATFCSM1")
 
     def send_uds_request(self, service_and_data_hex: str) -> Optional[bytes]:
         """Encapsule une requête UDS (inférieure ou égale à 7 octets) dans une Single Frame ISO-TP."""

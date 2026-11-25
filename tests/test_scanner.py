@@ -28,28 +28,27 @@ class TestIsoTpReassembly(unittest.TestCase):
 
 class TestEspace5UdsScanner(unittest.TestCase):
     def test_scan_easylink_and_ecm(self) -> None:
-        adapter = SimulatedEspace5Adapter(vin="VF1RFC00X66002021")
+        adapter = SimulatedEspace5Adapter(vin="VF1RFC00X66XXXXXX")
         scanner = Espace5UdsScanner(adapter)
         name, voltage = scanner.initialize_vgate()
         self.assertIn("ELM327", name)
-        self.assertEqual(voltage, "14.3V")
+        self.assertEqual(voltage, "14.2V")
 
-        # Scan Easy Link (0x712 -> 0x732)
+        # Scan Easy Link (11-bit 0x712 -> 0x732)
         easylink_res = scanner.scan_single_ecu(ECU_BY_KEY["easylink"])
         self.assertTrue(easylink_res.online)
-        self.assertEqual(easylink_res.vin, "VF1RFC00X66002021")
-        self.assertEqual(easylink_res.part_number, "283C36016R")
-        self.assertEqual(easylink_res.sw_version, "283C36016R")
-        self.assertEqual(easylink_res.programming_date, "2024-03-14")
-        self.assertEqual(easylink_res.identifications["F198"].decoded, "OTA_RENAULT_FOTA")
+        self.assertEqual(easylink_res.vin, "VF1RFC00X66XXXXXX")
+        self.assertEqual(easylink_res.part_number, "259159033R")
+        self.assertEqual(easylink_res.sw_version, "283C33813R")
+        self.assertEqual(easylink_res.identifications["F194"].decoded, "AI_PRJ_RN_AIVI_24.1V19")
+        self.assertEqual(easylink_res.identifications["F195"].decoded, "6919_240710")
 
-        # Scan Injection 2.0 Blue dCi (0x7E0 -> 0x7E8)
+        # Scan Injection 2.0 Blue dCi (29-bit 0x18DA10F1 -> 0x18DAF110)
         ecm_res = scanner.scan_single_ecu(ECU_BY_KEY["ecm"])
         self.assertTrue(ecm_res.online)
-        self.assertEqual(ecm_res.supplier, "BOSCH")
-        self.assertEqual(ecm_res.part_number, "237104892R")
-        self.assertEqual(ecm_res.programming_date, "2023-09-22")
-        self.assertEqual(ecm_res.identifications["F18B"].decoded, "2020-11-18")
+        self.assertIn("Bosch", ecm_res.supplier)
+        self.assertEqual(ecm_res.part_number, "237101663S")
+        self.assertEqual(ecm_res.sw_version, "237010816V")
 
 
 if __name__ == "__main__":

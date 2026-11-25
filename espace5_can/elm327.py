@@ -71,7 +71,6 @@ class SerialElmAdapter(BaseAdapter):
                     break
 
         raw = "".join(chunks)
-        # Nettoyage de l'écho, des retours chariots et du prompt '>'
         cleaned_lines: List[str] = []
         for line in raw.replace("\r", "\n").split("\n"):
             stripped = line.strip().replace(">", "").strip()
@@ -88,159 +87,219 @@ class SerialElmAdapter(BaseAdapter):
 
 
 class SimulatedEspace5Adapter(BaseAdapter):
-    """Simulateur fidèle d'un Vgate iCar Pro BLE branché sur une Renault Espace V 2.0 Blue dCi Phase 2."""
+    """Simulateur fidèle d'un Vgate iCar Pro BLE branché sur une Renault Espace V 2.0 Blue dCi Phase 2
+    (données basées sur l'empreinte réelle des 16 calculateurs 29-bit + 11-bit, VIN anonymisé)."""
 
-    def __init__(self, vin: str = "VF1RFC00X66002021") -> None:
+    def __init__(self, vin: str = "VF1RFC00X66XXXXXX") -> None:
         self.vin = vin
+        self.protocol = "6"  # "6" = 11-bit 500k, "7" = 29-bit 500k
+        self.current_cp = "18"
         self.current_tx = "7E0"
         self.current_rx = "7E8"
-        self.voltage = "14.3V"
+        self.voltage = "14.2V"
         self._ecu_data: Dict[str, Dict[str, bytes]] = self._build_mock_ecus()
 
     def _build_mock_ecus(self) -> Dict[str, Dict[str, bytes]]:
         vin_bytes = self.vin.encode("ascii")
         return {
-            # Injection 2.0 Blue dCi (Bosch MD1CS006)
-            "7E0": {
+            # --- 29-BIT ECUs (ATSP7) ---
+            # Unité de contrôle moteur 2.0 Blue dCi (18DA10F1)
+            "18DA10F1": {
                 "F190": vin_bytes,
-                "F187": b"237104892R",
-                "F18A": b"BOSCH",
-                "F191": b"237100854R",
-                "F193": b"H02",
-                "F194": b"10SW063912",
-                "F195": b"237105521R",
-                "F188": b"237615521R",
-                "F18C": b"BMD1CS0069941",
-                "F18B": bytes.fromhex("20201118"),
-                "F198": b"CLIP_FR_75015",
-                "F199": bytes.fromhex("20230922"),
-                "F1A0": bytes.fromhex("54"),
+                "F187": b"237101663S",
+                "F188": b"237010816V",
+                "F18A": b"Robert Bosch GmbH (037)",
+                "F191": b"237101663S",
+                "F194": b"7A00",
+                "F195": b"6K00 (Cal: 237610818V)",
+                "F18C": b"94840016201222090737",
+                "F199": bytes.fromhex("32333731303136363353"),
+                "F1A0": bytes.fromhex("8C"),
             },
-            # Boîte Auto EDC DW6 (Getrag 6DCT450)
-            "7E1": {
+            # Unité de commande de transmission EDC DW6 (18DA18F1)
+            "18DA18F1": {
                 "F190": vin_bytes,
-                "F187": b"310321984R",
+                "F187": b"310322081R",
+                "F188": b"310392109R",
                 "F18A": b"GETRAG",
-                "F191": b"310320742R",
-                "F194": b"DW6_P2_V18",
-                "F195": b"310322105R",
-                "F18C": b"GT6DCT4502841",
-                "F18B": bytes.fromhex("20201112"),
-                "F198": b"FACTORY_DOUAI",
-                "F199": bytes.fromhex("20201204"),
-                "F1A0": bytes.fromhex("1C"),
+                "F191": b"310321915R",
+                "F194": b"2541",
+                "F195": b"8210",
+                "F18C": b"200821191214",
+                "F199": bytes.fromhex("33313033323139313552"),
+                "F1A0": bytes.fromhex("0C"),
             },
-            # Module AdBlue SCR
-            "7E2": {
+            # Module de dosage AdBlue UDM (18DAE1F1)
+            "18DAE1F1": {
                 "F190": vin_bytes,
-                "F187": b"208993104R",
-                "F18A": b"BOSCH_SCR",
-                "F195": b"208994412R",
-                "F18B": bytes.fromhex("20201110"),
-                "F198": b"CLIP_FR_75015",
-                "F199": bytes.fromhex("20230922"),
+                "F187": b"237G00329R",
+                "F188": b"237G00556R",
+                "F18A": b"PLASTIC OMNIUM",
+                "F191": b"285J97945R",
+                "F194": b"9000",
+                "F195": b"F04 (Cal: 237G80562R)",
+                "F18C": b"0000000002110564",
+                "F199": bytes.fromhex("3238354A393739343552"),
+                "F1A0": bytes.fromhex("10"),
+            },
+            # Unité de commande ABS / ESC (18DA2DF1)
+            "18DA2DF1": {
+                "F190": vin_bytes,
+                "F187": b"476601440R",
+                "F188": b"476601440R",
+                "F18A": b"CONTI",
+                "F191": b"478514191R",
+                "F194": b"HPIPB",
+                "F195": b"N52CG001812 - MLC70/11",
+                "F18C": b"16717150062080100079",
+                "F199": bytes.fromhex("34373835313431393152"),
+                "F1A0": bytes.fromhex("09"),
+            },
+            # Affichage Tête Haute HMD (18DA9BF1)
+            "18DA9BF1": {
+                "F190": vin_bytes,
+                "F187": b"249416835R",
+                "F188": b"249992983R",
+                "F18A": b"BT2",
+                "F191": b"285J94233R",
+                "F194": b"R25",
+                "F195": b"V20B01",
+                "F18C": b"00000000000000004251",
+                "F199": bytes.fromhex("3238354A393432333352"),
                 "F1A0": bytes.fromhex("08"),
             },
-            # Système Multimédia Easy Link 9.3" (Bosch A-IVI)
+            # Security Gateway Gen 3 S-GW3 (18DAD1F1)
+            "18DAD1F1": {
+                "F190": vin_bytes,
+                "F187": b"284Y66LE5C",
+                "F188": b"SWF007.0003.0032",
+                "F18A": b"B408",
+                "F191": b"285J96LA5D",
+                "F194": b"F005VT1793",
+                "F195": b"SWF007.0003.0032",
+                "F18C": b"3712001436502C200720",
+                "F199": bytes.fromhex("3238354A39364C413544"),
+                "F1A0": bytes.fromhex("06"),
+            },
+            # --- 11-BIT ECUs (ATSP6) ---
+            # Système Multimédia Easy Link 9.3" (712)
             "712": {
                 "F190": vin_bytes,
-                "F187": b"283C36016R",
-                "F18A": b"BOSCH_AIVI",
-                "F191": b"281158429R",
-                "F193": b"GEN2.1",
-                "F194": b"AIVI_LINUX_4.14",
-                "F195": b"283C36016R",
-                "F188": b"283C62148R",
-                "F18C": b"AIVI93FR2021884",
-                "F18B": bytes.fromhex("20201115"),
-                "F198": b"OTA_RENAULT_FOTA",
-                "F199": bytes.fromhex("20240314"),
-                "F1A0": bytes.fromhex("2A"),
+                "F187": b"259159033R",
+                "F188": b"283C33813R",
+                "F18A": b"BOSCH",
+                "F191": b"285J95735R",
+                "F194": b"AI_PRJ_RN_AIVI_24.1V19",
+                "F195": b"6919_240710",
+                "F18C": b"00000002BG0048M",
+                "F199": bytes.fromhex("3238354A393537333552"),
+                "F1A0": bytes.fromhex("B1"),
             },
-            # Tableau de Bord Numérique TFT
+            # Tableau de Bord Numérique Visteon (743)
             "743": {
                 "F190": vin_bytes,
-                "F187": b"248109452R",
-                "F18A": b"VISTEON",
-                "F191": b"248104110R",
-                "F195": b"248109981R",
-                "F18B": bytes.fromhex("20201109"),
-                "F199": bytes.fromhex("20201204"),
-                "F1A0": bytes.fromhex("19"),
-            },
-            # Unité Centrale Habitacle (UCH / BCM)
-            "745": {
-                "F190": vin_bytes,
-                "F187": b"284B17512R",
-                "F18A": b"CONTI_BCM",
-                "F191": b"284B10984R",
-                "F195": b"284B18821R",
-                "F1A0": bytes.fromhex("41"),
-            },
-            # Châssis 4Control (4 roues directrices)
-            "784": {
-                "F190": vin_bytes,
-                "F187": b"555014829R",
-                "F18A": b"AISIN_4WS",
-                "F191": b"555011200R",
-                "F195": b"555016011R",
+                "F187": b"248105110R",
+                "F188": b"248B33935R",
+                "F18A": b"07-Visteon-Namestovo",
+                "F191": b"250465577R",
+                "F194": b"V09.05",
+                "F195": b"2006",
+                "F18C": b"20_09_11__0044923786",
+                "F199": bytes.fromhex("32353034363535373752"),
                 "F1A0": bytes.fromhex("12"),
             },
-            # Amortissement Piloté (AVS)
-            "781": {
+            # Unité Centrale Habitacle BCM (745)
+            "745": {
                 "F190": vin_bytes,
-                "F187": b"543028194R",
-                "F18A": b"KYB_AVS",
-                "F195": b"543029004R",
-                "F1A0": bytes.fromhex("0B"),
+                "F187": b"284B13925R",
+                "F188": b"284B37713R",
+                "F18A": b"CONTINENTAL AUTOMOTIVE",
+                "F191": b"284B21462R",
+                "F194": b"142902",
+                "F195": b"0710",
+                "F18C": b"0403426653",
+                "F199": bytes.fromhex("32383442323134363252"),
+                "F1A0": bytes.fromhex("90"),
             },
-            # ABS / ESP
-            "740": {
+            # SRS / Airbags (752)
+            "752": {
                 "F190": vin_bytes,
-                "F187": b"476607841R",
-                "F18A": b"ATE_CONTI",
-                "F195": b"476608912R",
-                "F1A0": bytes.fromhex("23"),
+                "F187": b"985102111R",
+                "F188": b"285A42149R",
+                "F18A": b"255414",
+                "F191": b"285J93115R",
+                "F194": b"S2_020OH.P72",
+                "F195": b"P72",
+                "F18C": b"U253JiD0045",
+                "F199": bytes.fromhex("3238354A393331313552"),
+                "F1A0": bytes.fromhex("09"),
             },
-            # Direction Assistée (EPS)
+            # Direction Assistée Power Steering TRW (742)
             "742": {
                 "F190": vin_bytes,
-                "F187": b"491105612R",
-                "F18A": b"JTEKT",
-                "F195": b"491106109R",
-                "F1A0": bytes.fromhex("15"),
+                "F187": b"490044671R",
+                "F188": b"285049500R",
+                "F18A": b"TRW",
+                "F191": b"285007079R",
+                "F194": b"S2RE03CD04",
+                "F195": b"S2RE03CD04",
+                "F18C": b"20267D840AN0530",
+                "F199": bytes.fromhex("32383530303730373952"),
+                "F1A0": bytes.fromhex("26"),
             },
-            # Climatisation (HVAC)
+            # Climatisation Heater & Air Conditioning (744)
             "744": {
-                "F190": vin_bytes,
-                "F187": b"275104821R",
-                "F18A": b"VALEO",
-                "F195": b"275105190R",
-                "F1A0": bytes.fromhex("0E"),
+                "F187": b"285252812R",
+                "F18A": b"740 (Valeo)",
+                "F194": b"F007",
+                "F195": b"1913",
+                "F1A0": bytes.fromhex("04"),
             },
-            # Amplificateur Bose Surround
-            "782": {
-                "F190": vin_bytes,
-                "F187": b"280634192R",
-                "F18A": b"BOSE_DSP",
-                "F195": b"280635011R",
-                "F1A0": bytes.fromhex("07"),
+            # Energy Management Module EMM (74D)
+            "74D": {
+                "F18A": b"414 (Continental)",
+                "F194": b"BA65",
+                "F195": b"6560",
+                "F1A0": bytes.fromhex("64"),
             },
-            # Caméra Frontale ADAS (Matrix LED)
-            "74B": {
+            # Sonar Bosch (74E)
+            "74E": {
                 "F190": vin_bytes,
-                "F187": b"284G26182R",
-                "F18A": b"VALEO_MOBILEYE",
-                "F195": b"284G27901R",
-                "F1A0": bytes.fromhex("1A"),
+                "F187": b"284L00448R",
+                "F188": b"284S92436R",
+                "F18A": b"BOSCH3",
+                "F191": b"285J97007R",
+                "F194": b"1270RS593P",
+                "F195": b"1270RS593P_S1.144.1.4",
+                "F18C": b"2008270748",
+                "F199": bytes.fromhex("3238354A393730303752"),
+                "F1A0": bytes.fromhex("08"),
             },
-            # Radar Frontal ACC
-            "753": {
+            # Key hands free HFM (792)
+            "792": {
                 "F190": vin_bytes,
-                "F187": b"284387412R",
-                "F18A": b"BOSCH_FRAD",
-                "F195": b"284388109R",
-                "F1A0": bytes.fromhex("14"),
+                "F187": b"285903089R",
+                "F188": b"285J92452R",
+                "F18A": b"CONTINENTAL",
+                "F191": b"285E26475R",
+                "F194": b"142A02",
+                "F195": b"0630",
+                "F18C": b"0500486047",
+                "F199": bytes.fromhex("32383545323634373552"),
+                "F1A0": bytes.fromhex("05"),
+            },
+            # Emergency Call and Communication Module TCU/SOS (77A)
+            "77A": {
+                "F190": vin_bytes,
+                "F187": b"2591A9374R",
+                "F188": b"282773501R",
+                "F18A": b"Continental",
+                "F191": b"282A78506R",
+                "F194": b"SW9",
+                "F195": b"SW9",
+                "F18C": b"200701202037888806",
+                "F199": bytes.fromhex("32383241373835303652"),
+                "F1A0": bytes.fromhex("04"),
             },
         }
 
@@ -252,8 +311,18 @@ class SimulatedEspace5Adapter(BaseAdapter):
             return "ELM327 v2.2"
         if upper == "ATRV":
             return self.voltage
+        if upper.startswith("ATSP"):
+            self.protocol = upper[4:]
+            return "OK"
+        if upper.startswith("ATCP"):
+            self.current_cp = upper[4:]
+            return "OK"
         if upper.startswith("ATSH"):
-            self.current_tx = upper[4:]
+            sh_val = upper[4:]
+            if self.protocol == "7" and len(sh_val) == 6:
+                self.current_tx = f"{self.current_cp}{sh_val}"
+            else:
+                self.current_tx = sh_val
             return "OK"
         if upper.startswith("ATCRA"):
             self.current_rx = upper[5:]
@@ -263,7 +332,6 @@ class SimulatedEspace5Adapter(BaseAdapter):
         if upper.startswith("AT"):
             return "OK"
 
-        # Vérifie si le calculateur est présent dans la simulation
         if self.current_tx not in self._ecu_data:
             return "NO DATA"
 
@@ -275,35 +343,30 @@ class SimulatedEspace5Adapter(BaseAdapter):
             if len(upper[2:]) == expected_len * 2:
                 upper = upper[2:]
 
-        # Service 0x10 : DiagnosticSessionControl (ex: 10 03 Extended Diagnostic Session)
         if upper.startswith("10"):
             sub_fn = upper[2:4] if len(upper) >= 4 else "03"
             return self._encode_isotp_response(bytes.fromhex(f"50{sub_fn}003201F4"))
 
-        # Service 0x3E : TesterPresent
         if upper.startswith("3E"):
             return self._encode_isotp_response(bytes.fromhex("7E00"))
 
-        # Service 0x22 : ReadDataByIdentifier (ex: 22F190)
         if upper.startswith("22") and len(upper) == 6:
             did = upper[2:6]
             if did in ecu_dids:
                 payload = bytes.fromhex(f"62{did}") + ecu_dids[did]
                 return self._encode_isotp_response(payload)
-            return self._encode_isotp_response(bytes.fromhex("7F2231"))  # RequestOutOfRange
+            return self._encode_isotp_response(bytes.fromhex("7F2231"))
 
         return "NO DATA"
 
     @staticmethod
     def _encode_isotp_response(payload: bytes) -> str:
-        """Encode une charge utile UDS en trames ISO-TP (Single Frame ou Multi-Frame)."""
         length = len(payload)
         if length <= 7:
             sf_pci = f"{length:02X}"
             body = " ".join(f"{b:02X}" for b in payload)
             return f"{sf_pci} {body}".strip()
 
-        # First Frame (FF): 1n nn + 6 premiers octets
         ff_pci_high = 0x10 | ((length >> 8) & 0x0F)
         ff_pci_low = length & 0xFF
         first_chunk = payload[:6]
@@ -311,7 +374,6 @@ class SimulatedEspace5Adapter(BaseAdapter):
             f"{ff_pci_high:02X} {ff_pci_low:02X} " + " ".join(f"{b:02X}" for b in first_chunk)
         ]
 
-        # Consecutive Frames (CF): 21, 22, ... + 7 octets max par trame
         offset = 6
         seq = 1
         while offset < length:
@@ -339,10 +401,8 @@ def parse_isotp_payload(raw_response: str) -> Optional[bytes]:
     if not lines:
         return None
 
-    # Extraction des octets hexadécimaux ligne par ligne
     frame_bytes_list: List[List[int]] = []
     for line in lines:
-        # Supprime d'éventuels préfixes type "0:" ou "1:" si ATH0/ATS1 varient
         if ":" in line and len(line.split(":")[0]) <= 3:
             line = line.split(":", 1)[1].strip()
         tokens = re.findall(r"\b[0-9A-F]{2}\b", line)
@@ -356,15 +416,12 @@ def parse_isotp_payload(raw_response: str) -> Optional[bytes]:
     first_byte = first_frame[0]
     frame_type = (first_byte >> 4) & 0x0F
 
-    # Cas 1 : Single Frame (0x01 .. 0x07)
     if frame_type == 0x0 and 1 <= (first_byte & 0x0F) <= 7:
         sf_len = first_byte & 0x0F
         if len(first_frame) >= 1 + sf_len:
             return bytes(first_frame[1 : 1 + sf_len])
-        # Certains modes ELM retournent déjà la charge utile sans l'octet PCI si CAF1 est actif
         return bytes(first_frame)
 
-    # Cas 2 : First Frame (0x1n nn) + Consecutive Frames (0x21, 0x22...)
     if frame_type == 0x1 and len(first_frame) >= 2:
         total_len = ((first_byte & 0x0F) << 8) | first_frame[1]
         assembled: List[int] = list(first_frame[2:])
@@ -376,7 +433,6 @@ def parse_isotp_payload(raw_response: str) -> Optional[bytes]:
                 assembled.extend(cf[1:])
         return bytes(assembled[:total_len])
 
-    # Cas 3 : L'ELM327 a déjà retiré l'octet PCI (réponse directe commençant par 0x50, 0x62, 0x7F...)
     flat = [b for frame in frame_bytes_list for b in frame]
     return bytes(flat)
 
