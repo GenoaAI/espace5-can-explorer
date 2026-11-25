@@ -17,6 +17,12 @@ from .elm327 import (
     TransportError,
     list_serial_ports,
 )
+from .hmi_explorer import (
+    DASHBOARD_HMI_DIDS,
+    EASYLINK_HMI_DIDS,
+    EasyLinkHmiExplorer,
+    decode_easylink_hmi_dids,
+)
 from .uds_scanner import EcuScanResult, Espace5UdsScanner
 
 
@@ -151,6 +157,11 @@ def build_parser() -> argparse.ArgumentParser:
         help=f"Scanne uniquement un calculateur précis parmi : {', '.join(ECU_BY_KEY.keys())}",
     )
     parser.add_argument(
+        "--scan-hmi",
+        action="store_true",
+        help="Interroge et décode les registres internes d'IHM et de connectivité (Wi-Fi / Android Auto Sans Fil / Multi-Sense) de l'Easy Link (0x712) et du Compteur (0x743).",
+    )
+    parser.add_argument(
         "--json-out",
         type=str,
         default=None,
@@ -163,6 +174,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Chemin du rapport Markdown où sauvegarder la fiche d'identité (ex: reports/scan.md).",
     )
     return parser
+
+
+def print_hmi_inspection(scanner: Espace5UdsScanner) -> None:
+    """Exécute et affiche l'inspection approfondie des registres IHM de l'Easy Link (0x712) et du Compteur (0x743)."""
+    explorer = EasyLinkHmiExplorer(scanner)
+    easylink_ecu = ECU_BY_KEY["easylink"]
+    tdb_ecu = ECU_BY_KEY["tdb"]
+
+    print("\n" + "=" * 114)
+    print(" INSPECTION DES REGISTRES IHM & CONNECTIVITÉ - EASY LINK 9.3\" (0x712) & TABLEAU DE BORD (0x743)")
+    print("=" * 114)
+
+    el_dids = explorer.probe_ecu_dids(easylink_ecu, EASYLINK_HMI_DIDS)
+    print("\n [1] REGISTRES BRUTS LUS SUR EASY LINK (0x712 -> 0x732, Service 0x22) :")
+    for did_key, val in el_dids.items():
+        print(f"   - DID 0x{did_key} ({val.label:<68}) : {val.decoded} [Hex: {val.raw_hex}]")
+
+    decoded = decode_easylink_hmi_dids(el_dids)
+    if decoded:
+        print("\n [2] DÉCODAGE DES FONCTIONS IHM & SANS-FIL EASY LINK :")
+        for p in decoded:
+            print(f"   * [0x{p.did}] {p.parameter_name}")
+            print(f"       -> État actuel : {p.current_state} ( Brut: 0x{p.raw_hex} )")
+            print(f"       -> Note        : {p.details}")
+
+    tdb_dids = explorer.probe_ecu_dids(tdb_ecu, DASHBOARD_HMI_DIDS)
+    print("\n [3] REGISTRES IHM LUS SUR TABLEAU DE BORD NUMÉRIQUE VISTEON (0x743 -> 0x763) :")
+    for did_key, val in tdb_dids.items():
+        print(f"   - DID 0x{did_key} ({val.label:<68}) : {val.decoded} [Hex: {val.raw_hex}]")
+    print("=" * 114 + "\n")
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -208,6 +249,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         scanner = Espace5UdsScanner(adapter)
         adapter_name, voltage = scanner.initialize_vgate()
+
+        if args.scan_hmi:
+            print_hmi_inspection(scanner)
+            return 0
 
         def on_progress(ecu: EcuDefinition, idx: int, total: int) -> None:
             print(f" [{idx:02d}/{total:02d}] Interrogation UDS 0x{ecu.tx_id}->0x{ecu.rx_id} : {ecu.name}...")

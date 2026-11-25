@@ -5,6 +5,7 @@ import unittest
 from espace5_can.dtc import format_dtc_from_3bytes, parse_uds_1902_response
 from espace5_can.ecus import ECU_BY_KEY
 from espace5_can.elm327 import SimulatedEspace5Adapter, parse_isotp_payload
+from espace5_can.hmi_explorer import EASYLINK_HMI_DIDS, EasyLinkHmiExplorer, decode_easylink_hmi_dids
 from espace5_can.uds_scanner import Espace5UdsScanner
 
 
@@ -70,6 +71,22 @@ class TestDtcDecoder(unittest.TestCase):
         self.assertFalse(dtcs[0].is_active)
         self.assertEqual(dtcs[1].code, "B272B(97)")
         self.assertTrue(dtcs[1].is_active)
+
+
+class TestEasyLinkHmiExplorer(unittest.TestCase):
+    def test_probe_and_decode_easylink_hmi(self) -> None:
+        adapter = SimulatedEspace5Adapter()
+        scanner = Espace5UdsScanner(adapter)
+        scanner.initialize_vgate()
+
+        explorer = EasyLinkHmiExplorer(scanner)
+        dids = explorer.probe_ecu_dids(ECU_BY_KEY["easylink"], EASYLINK_HMI_DIDS)
+        self.assertIn("2001", dids)
+        self.assertIn("2002", dids)
+
+        decoded = decode_easylink_hmi_dids(dids)
+        self.assertGreaterEqual(len(decoded), 4)
+        self.assertIn("AA USB: ON", decoded[0].current_state)
 
 
 if __name__ == "__main__":

@@ -194,6 +194,15 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F18C": b"00000002BG0048M",
                 "F199": bytes.fromhex("3238354A393537333552"),
                 "F1A0": bytes.fromhex("B1"),
+                # Registres IHM & Connectivité Easy Link (DIDs 0x20xx)
+                "2001": bytes.fromhex("03010100"),  # AA USB=ON, CarPlay USB=ON, AA Wireless=OFF (bit 2=0), CarPlay Wireless=OFF
+                "2002": bytes.fromhex("010500"),    # Wi-Fi 5GHz matériellement présent mais en veille
+                "2003": bytes.fromhex("000102"),    # Thème 0x00 = Renault Standard
+                "2006": bytes.fromhex("0F0701"),    # Multi-Sense 4 modes + LEDs portes/console
+                "2008": bytes.fromhex("010200"),    # Config Audio
+                "200B": bytes.fromhex("030101"),    # Caméra de recul + Sonar 360
+                "200E": bytes.fromhex("010100"),    # Bandeau climatisation IHM
+                "2010": bytes.fromhex("0105"),      # Driving Eco2 actif
             },
             # Tableau de Bord Numérique Visteon (743)
             "743": {
@@ -207,6 +216,8 @@ class SimulatedEspace5Adapter(BaseAdapter):
                 "F18C": b"20_09_11__0044923786",
                 "F199": bytes.fromhex("32353034363535373752"),
                 "F1A0": bytes.fromhex("12"),
+                "3001": bytes.fromhex("0F01"),      # 4 styles graphiques compteur activés
+                "3004": bytes.fromhex("1F03"),      # Widgets compteur (Nav, Audio, Eco, Boussole)
             },
             # Unité Centrale Habitacle BCM (745)
             "745": {
