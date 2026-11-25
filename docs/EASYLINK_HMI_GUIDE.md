@@ -88,7 +88,11 @@ Lors d'une tentative d'écriture (`Activée` sur `Wireless Android Auto & Apple 
 
 ### Comment agir malgré la passerelle `S-GW3` :
 1. **Option Matérielle (Pour écrire dans `0x712` avec Car Scanner ou DDT4ALL)** :
-   - Utiliser un adaptateur **Renault SGW Bypass** sur le boîtier `S-GW3` (`284Y66LE5C`) ou un câble de repiquage CAN direct sur l'unité Easy Link (`259159033R`) en aval de la passerelle `S-GW3`.
+   Il existe deux types de faisceaux en Y selon l'endroit où l'on se raccorde :
+   - **Faisceau en Y "Direct Easy Link — Connecteur Gris 24 broches"** *(Recommandé pour coder l'écran Easy Link `259159033R`)* :
+     S'intercale directement sur le **connecteur gris à 24 broches** au dos du calculateur multimédia Easy Link (`259159033R`, situé derrière la boîte à gants) et expose une prise OBD-II femelle 16 broches (avec le bus CAN de l'Easy Link routé sur les pins 6 & 14 + alimentation 12V). Permet d'écrire directement dans `0x712` avec le **Vgate iCar Pro BLE** (Car Scanner / DDT4ALL) en aval de la `S-GW3`.
+   - **Faisceau Bypass `16 + 32 broches` sur le boîtier `S-GW3` (`284Y66LE5C`)** :
+     S'intercale à la place de la passerelle `S-GW3` sous la planche de bord pour déverrouiller l'écriture sur l'ensemble des réseaux CAN du véhicule (attention à choisir un faisceau câblant tous les bus CAN Renault/Dacia, et non un câble *"Nissan 16+32"* basique qui ne relie souvent que le CAN moteur).
 2. **Option Logicielle Côté Smartphone Android Auto (Sans toucher au matériel véhicule)** :
    - La restriction `Speed_lock_restrictions` de l'Easy Link ne bride que le lecteur vidéo USB natif de l'Easy Link, **pas le flux projeté par Android Auto**.
-   - En activant le **Mode Développeur d'Android Auto** sur le smartphone (et/ou via ADB avec `adb install -i "com.android.vending"`), on peut projeter des tableaux de bord CAN personnalisés (*Car Scanner*), un navigateur web ou de la vidéo (*Fermata Auto* / *Screen2Auto*) directement sur l'écran 9,3".
+   - En activant le **Mode Développeur d'Android Auto** sur le smartphone (et/ou via ADB avec `adb install -i "com.android.vending"`), on peut projeter des tableaux de bord CAN personnalisés (*Car Scanner*, [`web/easylink_cockpit.html`](../web/easylink_cockpit.html)), un navigateur web ou le miroir complet du téléphone (*Fermata Mirror* / *Screen2Auto*) directement sur l'écran 9,3".
