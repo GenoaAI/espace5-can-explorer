@@ -67,8 +67,21 @@ Mesures capturées en temps réel sur route :
 
 > **Analyse de la mesure `16.2 kPa` (`162 mbar`) à `1 500 tr/min`** :
 > Une pression différentielle de `162 mbar` à seulement `1 500 tr/min` est **élevée** (la valeur nominale d'un FAP peu chargé à `1 500 tr/min` se situe entre `2.0 et 5.5 kPa`, soit `20 à 55 mbar`).
-> - **Vérification n°1 (Test d'offset du capteur à l'arrêt, moteur coupé / contact mis)** : Vérifier si `Delta Pressure` retombe bien à **`0.0 kPa`** moteur éteint. Si le capteur affiche une valeur non nulle (ex: `8 à 12 kPa` moteur éteint), le **capteur de pression différentielle FAP a dérivé** et envoie une valeur erronée au calculateur (ce qui déclenche `P2002` par incohérence du modèle de pression).
-> - **Vérification n°2 (Si le capteur retombe bien à `0.0 kPa` moteur coupé)** : À **`278 483 km`**, une contre-pression réelle de `162 mbar` à `1 500 tr/min` indique un FAP fortement chargé en cendres/suie (un nettoyage professionnel hydrogène/machine FAP ou remplacement du capteur différentiel est alors pertinent).
+
+#### Relevé Statique au Ralenti puis Moteur Coupé (Validation du Zéro Capteur)
+Mesures capturées à l'arrêt (`13:00`) :
+
+| État Moteur | Pression Différentielle FAP (`Delta Pressure`) | Équivalent `mbar` | Valeur Nominale Attendue | Verdict |
+|---|---|---|---|---|
+| **Moteur coupé (Contact mis, `0 tr/min`)** | **`0.00 kPa`** | **`0 mbar`** | `0.0 kPa` (`0 mbar`) | **Capteur 100 % sain électriquement** (aucun décalage/offset du zéro) |
+| **Ralenti stabilisé (`~800 tr/min`)** | **`5.91 à 6.01 kPa`** *(oscillation pulsations)* | **`59 à 60 mbar`** | `0.5 à 1.5 kPa` (`5 à 15 mbar`) | **Contre-pression au ralenti 4x à 5x supérieure à la normale** |
+| **Croisière (`1 500 tr/min` @ `80 km/h`)** | **`16.20 kPa`** | **`162 mbar`** | `2.5 à 5.5 kPa` (`25 à 55 mbar`) | **Contre-pression élevée en charge partielle** |
+
+> **Diagnostic Final suite à la courbe Ralenti (`5.98 kPa`) -> Arrêt (`0.00 kPa`)** :
+> 1. **Le capteur électronique lui-même est hors de cause** puisqu'il retombe pile à `0.00 kPa` à la seconde où le moteur s'arrête (`48:20` sur le graphe).
+> 2. **Il ne reste que 2 causes physiques possibles pour expliquer `60 mbar` au ralenti et le code `P2002` à `278 483 km`** :
+>    - **Cause A (À vérifier en premier, 5 min)** : **Le piquage ou la durite AVAL (sortie FAP) du capteur de pression différentielle est bouché par de la calamine/condensation**. Si le tube aval est obstrué, le capteur ne soustrait plus la pression aval et mesure la pression brute amont (~60 mbar au ralenti), ce qui fausse le modèle du calculateur et lève `P2002`. Un simple débouchage à l'air comprimé des deux conduites du capteur suffit à vérifier.
+>    - **Cause B (Si les deux tubes sont débouchés)** : À **`278 483 km`**, le FAP est **saturé en cendres incombustibles** (et/ou suie), créant `60 mbar` de perte de charge dès le ralenti. Un **décalaminage / nettoyage hydro-dynamique du FAP** (ou remplacement) permettra de retrouver `~0.8 à 1.2 kPa` (`8 à 12 mbar`) au ralenti.
 
 ---
 
