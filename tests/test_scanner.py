@@ -2,6 +2,7 @@
 
 import unittest
 
+from espace5_can.dtc import format_dtc_from_3bytes, parse_uds_1902_response
 from espace5_can.ecus import ECU_BY_KEY
 from espace5_can.elm327 import SimulatedEspace5Adapter, parse_isotp_payload
 from espace5_can.uds_scanner import Espace5UdsScanner
@@ -49,6 +50,26 @@ class TestEspace5UdsScanner(unittest.TestCase):
         self.assertIn("Bosch", ecm_res.supplier)
         self.assertEqual(ecm_res.part_number, "237101663S")
         self.assertEqual(ecm_res.sw_version, "237010816V")
+
+
+class TestDtcDecoder(unittest.TestCase):
+    def test_decode_sonar_b272b_97_active(self) -> None:
+        # 0xA72B97 = B272B(97), status 0x2B (actif + confirmé)
+        dtc = format_dtc_from_3bytes(0xA7, 0x2B, 0x97, status_byte=0x2B)
+        self.assertEqual(dtc.code, "B272B(97)")
+        self.assertEqual(dtc.base_code, "B272B")
+        self.assertTrue(dtc.is_active)
+        self.assertIn("obstrué", dtc.ftb_meaning)
+
+    def test_parse_uds_1902_payload(self) -> None:
+        # Réponse 59 02 FF + A4 E8 02 28 (B24E8(02) archivé) + A7 2B 97 2F (B272B(97) actif)
+        payload = bytes.fromhex("5902FFA4E80228A72B972F")
+        dtcs = parse_uds_1902_response(payload)
+        self.assertEqual(len(dtcs), 2)
+        self.assertEqual(dtcs[0].code, "B24E8(02)")
+        self.assertFalse(dtcs[0].is_active)
+        self.assertEqual(dtcs[1].code, "B272B(97)")
+        self.assertTrue(dtcs[1].is_active)
 
 
 if __name__ == "__main__":
