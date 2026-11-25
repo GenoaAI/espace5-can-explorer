@@ -57,6 +57,19 @@ Conditions exactes enregistrées par le calculateur Bosch `MD1CS006` au moment d
 
 > **Conclusion de la Trame Figée** : L'ensemble de la boucle d'air (turbo, débitmètre `36 g/s`, EGR `0 %` d'erreur) et d'injection (`1 123 bar`) fonctionne de manière nominale. Le défaut `P2002` est purement lié à la mesure de contre-pression/efficacité du FAP lorsque le débit de gaz atteint `~36 g/s` à `2 048 tr/min`.
 
+#### Relevé Dynamique en Roulant (`80 km/h` stabilisé @ `1 500 tr/min`)
+Mesures capturées en temps réel sur route :
+- **Température d'entrée FAP (`DPF banc 1 Capteur de température d'entrée`)** : **`323.9 °C`** (Température d'échappement parfaitement normale en croisière).
+- **Régénération FAP en cours** : **`0`** (Aucune régénération active/passive au moment de la mesure).
+- **Pression différentielle FAP (`Banc de filtres à particules diesel 1 Delta Pressure`)** : **`16.2 kPa` (`162 mbar`)** à `1 500 tr/min`.
+- **Pression d'entrée compresseur turbo** : **`99 kPa`** (= Pression atmosphérique `99 kPa`, confirmant que le filtre à air moteur n'a aucune perte de charge).
+- **Pression rampe Common Rail en charge** : **`104 020 kPa`** mesurés pour **`104 430 kPa`** commandés (écart `< 0.4 %`, régulation haute pression parfaite).
+
+> **Analyse de la mesure `16.2 kPa` (`162 mbar`) à `1 500 tr/min`** :
+> Une pression différentielle de `162 mbar` à seulement `1 500 tr/min` est **élevée** (la valeur nominale d'un FAP peu chargé à `1 500 tr/min` se situe entre `2.0 et 5.5 kPa`, soit `20 à 55 mbar`).
+> - **Vérification n°1 (Test d'offset du capteur à l'arrêt, moteur coupé / contact mis)** : Vérifier si `Delta Pressure` retombe bien à **`0.0 kPa`** moteur éteint. Si le capteur affiche une valeur non nulle (ex: `8 à 12 kPa` moteur éteint), le **capteur de pression différentielle FAP a dérivé** et envoie une valeur erronée au calculateur (ce qui déclenche `P2002` par incohérence du modèle de pression).
+> - **Vérification n°2 (Si le capteur retombe bien à `0.0 kPa` moteur coupé)** : À **`278 483 km`**, une contre-pression réelle de `162 mbar` à `1 500 tr/min` indique un FAP fortement chargé en cendres/suie (un nettoyage professionnel hydrogène/machine FAP ou remplacement du capteur différentiel est alors pertinent).
+
 ---
 
 ### B. `B272B(97) [0xA72B97]` — Aide au Stationnement (`Sonar` - `0x74E`)
