@@ -224,3 +224,35 @@ class EasyLinkHmiExplorer:
             if resp and len(resp) >= 3 and resp[:3] == bytes.fromhex(f"62{did_hex}"):
                 discovered[did_hex] = resp[3:].hex().upper()
         return discovered
+
+
+# Codes de rejet UDS (Negative Response Codes - NRC 0x7F [Service] [NRC])
+UDS_NRC_DESCRIPTIONS: Dict[int, str] = {
+    0x11: "ServiceNotSupported (0x11) - Service non supporté",
+    0x12: "SubFunctionNotSupported (0x12) - Sous-fonction non supportée",
+    0x13: "IncorrectMessageLengthOrInvalidFormat (0x13) - Longueur de trame invalide",
+    0x22: "ConditionsNotCorrect (0x22) - Conditions non remplies (contact mis moteur arrêté requis)",
+    0x31: "RequestOutOfRange (0x31) - DID inconnu sur cette variante Easy Link (B1)",
+    0x33: "SecurityAccessDenied (0x33) - Accès refusé par sécurité / Passerelle S-GW3",
+    0x7E: "SubFunctionNotSupportedInActiveSession (0x7E) - Session 10 03 requise",
+    0x7F: "ServiceNotSupportedInActiveSession (0x7F) - Bloqué dans cette session ou par S-GW3",
+}
+
+
+def explain_uds_write_response(raw_resp: Optional[bytes], did_hex: str) -> str:
+    """Interprète la réponse de l'Easy Link (0x712) à une requête d'écriture UDS 0x2E."""
+    if raw_resp is None:
+        return (
+            "AUCUNE RÉPONSE (NO DATA / Filtré par la passerelle S-GW3 284Y66LE5C). "
+            "La passerelle S-GW3 a intercepté et jeté la trame d'écriture 0x2E sur la prise OBD. "
+            "Il faut utiliser le câble en Y 24 broches gris au dos de l'Easy Link (259159033R)."
+        )
+    if len(raw_resp) >= 3 and raw_resp[0] == 0x6E:
+        return f"SUCCÈS (0x6E {did_hex}) ! Le registre a été écrit dans l'Easy Link. Redémarrez l'écran (appui 10s sur Power)."
+    if len(raw_resp) >= 3 and raw_resp[0] == 0x7F:
+        service = raw_resp[1]
+        nrc = raw_resp[2]
+        desc = UDS_NRC_DESCRIPTIONS.get(nrc, f"Code NRC inconnu 0x{nrc:02X}")
+        return f"REJET UDS (7F {service:02X} {nrc:02X}) : {desc}"
+    return f"Réponse brute inattendue : {raw_resp.hex().upper()}"
+
