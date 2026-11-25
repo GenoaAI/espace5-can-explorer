@@ -77,3 +77,18 @@ L'interrogation en direct du calculateur **Easy Link (`0x712` -> `0x732`, varian
 - `BOSE sound improvement - step #1/3` & `step #2/3` (Profils DSP audio Bose)
 - `4WD information display` (Affichage widget châssis / inclinomètre)
 - `Climate area` & `Climate mode selection` (Widgets de climatisation à l'écran)
+
+---
+
+## 4. Résultat du Test d'Écriture (`Service 0x2E`) via la Prise OBD-II & Comportement de la Passerelle `S-GW3`
+
+Lors d'une tentative d'écriture (`Activée` sur `Wireless Android Auto & Apple CarPlay`) depuis la prise OBD-II sous le volant :
+- **Lecture (`Service 0x22 ReadDataByIdentifier`)** : **100 % fonctionnelle** (les états actuels `Désactivé` et `Activée` sont lus en temps réel).
+- **Écriture (`Service 0x2E WriteDataByIdentifier`)** : **Bloquée par la passerelle `S-GW3` (`284Y66LE5C`, SW `SWF007.0003.0032`)** -> Car Scanner retourne `Erreur de codage! UnknownError` (Negative Response Code `7F 2E ...` filtré par la Security Gateway).
+
+### Comment agir malgré la passerelle `S-GW3` :
+1. **Option Matérielle (Pour écrire dans `0x712` avec Car Scanner ou DDT4ALL)** :
+   - Utiliser un adaptateur **Renault SGW Bypass** sur le boîtier `S-GW3` (`284Y66LE5C`) ou un câble de repiquage CAN direct sur l'unité Easy Link (`259159033R`) en aval de la passerelle `S-GW3`.
+2. **Option Logicielle Côté Smartphone Android Auto (Sans toucher au matériel véhicule)** :
+   - La restriction `Speed_lock_restrictions` de l'Easy Link ne bride que le lecteur vidéo USB natif de l'Easy Link, **pas le flux projeté par Android Auto**.
+   - En activant le **Mode Développeur d'Android Auto** sur le smartphone (et/ou via ADB avec `adb install -i "com.android.vending"`), on peut projeter des tableaux de bord CAN personnalisés (*Car Scanner*), un navigateur web ou de la vidéo (*Fermata Auto* / *Screen2Auto*) directement sur l'écran 9,3".
