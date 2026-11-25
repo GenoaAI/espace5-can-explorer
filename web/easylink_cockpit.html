@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Renault Espace V (2.0 Blue dCi & Easy Link 9.3") — Live CAN & Audio Sidebar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased p-3 m-0 select-none">
+  <div class="max-w-5xl mx-auto space-y-3">
+    <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="font-bold text-indigo-400">RENAULT ESPACE V • EASY LINK 9.3" (283C33813R)</span>
+        <span id="ble-status" class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">Mode: Simulation (278 483 km)</span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="btn-ble" class="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-semibold">Connecter Vgate BLE (IOS-Vlink)</button>
+        <button id="btn-idle" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Ralenti (5.98 kPa)</button>
+        <button id="btn-cruise" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">80 km/h (16.2 kPa)</button>
+        <button id="btn-regen" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Régén. FAP (618°C)</button>
+        <button id="btn-off" class="px-2 py-1 rounded bg-slate-800 border border-slate-700">Arrêt (0 kPa)</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-12 gap-3">
+      <!-- Zone Principale (8/12) : Navigation Waze / Carte -->
+      <div class="col-span-12 md:col-span-8 flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-900 p-3 space-y-2">
+        <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="font-mono font-bold">10°C</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 font-medium">Waze • Split Cockpit</span>
+          </div>
+          <div class="flex items-center gap-3 font-mono">
+            <span id="top-speed" class="text-sm font-bold text-emerald-400">80 km/h</span>
+            <span id="waze-rpm" class="text-slate-400">1500 rpm</span>
+          </div>
+        </div>
+
+        <div class="relative w-full">
+          <canvas id="waze-canvas" width="560" height="310" class="w-full rounded-lg border border-slate-800 bg-slate-950 block"></canvas>
+          <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between bg-slate-900/95 border border-slate-700 rounded-lg px-3 py-1.5 text-xs">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded font-mono font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">DTC P2002</span>
+              <span id="fap-status-text" class="text-slate-300 font-mono">Régén. FAP : 0 (Inactive)</span>
+            </div>
+            <span class="font-mono text-amber-400">AdBlue : Prévoir appoint (10L max)</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="text-slate-400 font-semibold">CLIM (0x744)</span>
+            <span class="font-mono font-bold text-sm">21.0°C</span>
+            <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">AUTO • A/C • SYNC</span>
+          </div>
+          <div class="font-mono text-slate-400">
+            Batterie ESM (0x74D): <strong id="batt-val" class="text-emerald-400">14.48 V</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bandeau Latéral Droit (4/12) : Courbes CAN Temps Réel + Contrôles Audio/Balance -->
+      <div class="col-span-12 md:col-span-4 flex flex-col justify-between rounded-xl border border-slate-800 bg-slate-900 p-3 space-y-3 text-xs">
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">FAP Delta Pressure</span>
+            <span id="dpf-kpa-val" class="font-mono text-sm font-bold text-amber-400">16.20 kPa</span>
+          </div>
+          <canvas id="dpf-chart" width="260" height="110" class="w-full rounded border border-slate-800 bg-slate-950 block"></canvas>
+          <div class="flex items-center justify-between text-slate-400 font-mono">
+            <span>Amont FAP: <strong id="dpf-temp-val" class="text-slate-100">323.9°C</strong></span>
+            <span>MAF: <strong id="maf-val" class="text-slate-100">36.0 g/s</strong></span>
+          </div>
+        </div>
+
+        <div class="space-y-1.5 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">Turbo MAP & Common Rail</span>
+            <span id="turbo-val" class="font-mono font-bold text-indigo-400">170 kPa</span>
+          </div>
+          <div class="w-full h-2.5 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+            <div id="turbo-bar" class="h-full bg-indigo-500" style="width: 70%"></div>
+          </div>
+          <div class="flex items-center justify-between text-slate-400 font-mono">
+            <span>Rail: <strong id="rail-val" class="text-slate-100">1040 bar</strong></span>
+            <span>EGR Err: <strong class="text-emerald-400">0%</strong></span>
+          </div>
+        </div>
+
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-200">Audio & Balance DSP</span>
+            <button id="btn-mute" class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono">MUTE</button>
+          </div>
+          <label class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">Volume</span>
+            <input id="vol-slider" type="range" min="0" max="30" value="18" class="w-28 accent-indigo-500" />
+            <span id="vol-readout" class="font-mono w-8 text-right">18</span>
+          </label>
+          <label class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">Balance G/D</span>
+            <input id="bal-slider" type="range" min="-5" max="5" value="0" class="w-28 accent-indigo-500" />
+            <span id="bal-readout" class="font-mono w-8 text-right">C</span>
+          </label>
+          <label class="flex items-center justify-between gap-2">
+            <span class="text-slate-400">Bass Boost</span>
+            <input id="bass-slider" type="range" min="-5" max="5" value="2" class="w-28 accent-indigo-500" />
+            <span id="bass-readout" class="font-mono w-8 text-right">+2</span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const state = {
+      mode: 'cruise',
+      targetKpa: 16.2,
+      currentKpa: 16.2,
+      dpfTemp: 323.9,
+      rpm: 1500,
+      speed: 80,
+      maf: 36.0,
+      mapKpa: 170,
+      railBar: 1040,
+      voltage: 14.48,
+      regen: 0,
+      muted: false,
+      history: Array.from({ length: 50 }, () => 16.2),
+      roadOffset: 0
+    };
+
+    const modes = {
+      idle: { kpa: 5.98, temp: 185.0, rpm: 800, speed: 0, maf: 9.8, map: 101, rail: 320, volt: 14.35, regen: 0 },
+      cruise: { kpa: 16.2, temp: 323.9, rpm: 1500, speed: 80, maf: 36.0, map: 170, rail: 1040, volt: 14.48, regen: 0 },
+      regen: { kpa: 21.4, temp: 618.5, rpm: 2050, speed: 92, maf: 48.5, map: 195, rail: 1350, volt: 14.20, regen: 2 },
+      off: { kpa: 0.0, temp: 140.0, rpm: 0, speed: 0, maf: 0.0, map: 99, rail: 0, volt: 12.55, regen: 0 }
+    };
+
+    function setMode(m) {
+      state.mode = m;
+      const cfg = modes[m];
+      state.targetKpa = cfg.kpa;
+      state.dpfTemp = cfg.temp;
+      state.rpm = cfg.rpm;
+      state.speed = cfg.speed;
+      state.maf = cfg.maf;
+      state.mapKpa = cfg.map;
+      state.railBar = cfg.rail;
+      state.voltage = cfg.volt;
+      state.regen = cfg.regen;
+    }
+
+    document.getElementById('btn-idle').addEventListener('click', () => setMode('idle'));
+    document.getElementById('btn-cruise').addEventListener('click', () => setMode('cruise'));
+    document.getElementById('btn-regen').addEventListener('click', () => setMode('regen'));
+    document.getElementById('btn-off').addEventListener('click', () => setMode('off'));
+
+    // Connexion directe Web Bluetooth BLE au Vgate iCar Pro BLE (IOS-Vlink) depuis Chrome Android / Windows
+    document.getElementById('btn-ble').addEventListener('click', async () => {
+      const badge = document.getElementById('ble-status');
+      if (!navigator.bluetooth) {
+        badge.textContent = 'Web Bluetooth non supporté sur ce navigateur';
+        return;
+      }
+      try {
+        badge.textContent = 'Recherche IOS-Vlink BLE...';
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ namePrefix: 'IOS-Vlink' }, { namePrefix: 'Vlink' }, { namePrefix: 'Android-Vlink' }],
+          optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb', 'e7810a71-73ae-499d-8c15-faa9aef0c3f2']
+        });
+        await device.gatt.connect();
+        badge.textContent = 'Connecté en direct : ' + (device.name || 'Vgate iCar Pro BLE');
+      } catch (err) {
+        badge.textContent = 'Simulation active (' + err.message + ')';
+      }
+    });
+
+    const volSlider = document.getElementById('vol-slider');
+    const balSlider = document.getElementById('bal-slider');
+    const bassSlider = document.getElementById('bass-slider');
+    const muteBtn = document.getElementById('btn-mute');
+
+    volSlider.addEventListener('input', () => {
+      state.muted = false;
+      document.getElementById('vol-readout').textContent = volSlider.value;
+    });
+    balSlider.addEventListener('input', () => {
+      const v = parseInt(balSlider.value, 10);
+      document.getElementById('bal-readout').textContent = v === 0 ? 'C' : (v < 0 ? 'G' + Math.abs(v) : 'D' + v);
+    });
+    bassSlider.addEventListener('input', () => {
+      const v = parseInt(bassSlider.value, 10);
+      document.getElementById('bass-readout').textContent = (v > 0 ? '+' : '') + v;
+    });
+    muteBtn.addEventListener('click', () => {
+      state.muted = !state.muted;
+      document.getElementById('vol-readout').textContent = state.muted ? 'OFF' : volSlider.value;
+    });
+
+    function drawDpfChart() {
+      const canvas = document.getElementById('dpf-chart');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      [0.25, 0.5, 0.75].forEach(r => {
+        ctx.beginPath();
+        ctx.moveTo(0, h * r);
+        ctx.lineTo(w, h * r);
+        ctx.stroke();
+      });
+
+      const maxKpa = 25.0;
+      ctx.beginPath();
+      ctx.strokeStyle = state.currentKpa > 12 ? '#f59e0b' : '#6366f1';
+      ctx.lineWidth = 2.5;
+      state.history.forEach((val, idx) => {
+        const x = (idx / (state.history.length - 1)) * w;
+        const y = h - Math.min(1, Math.max(0, val / maxKpa)) * (h - 12) - 6;
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    function drawWazeMap() {
+      const canvas = document.getElementById('waze-canvas');
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      const offset = state.roadOffset % 32;
+      for (let y = offset; y < h; y += 32) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+      for (let x = 40; x < w; x += 64) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 16;
+      ctx.lineCap = 'round';
+      ctx.moveTo(w * 0.45, h);
+      ctx.quadraticCurveTo(w * 0.48, h * 0.55, w * 0.62, 0);
+      ctx.stroke();
+
+      const vx = w * 0.47;
+      const vy = h * 0.72;
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(vx, vy - 12);
+      ctx.lineTo(vx - 9, vy + 9);
+      ctx.lineTo(vx, vy + 4);
+      ctx.lineTo(vx + 9, vy + 9);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function tick() {
+      const jitter = state.mode === 'off' ? 0 : (Math.random() - 0.5) * 0.14;
+      state.currentKpa = state.currentKpa * 0.65 + state.targetKpa * 0.35 + jitter;
+      if (state.mode === 'off' && state.currentKpa < 0.08) state.currentKpa = 0;
+
+      state.history.push(state.currentKpa);
+      if (state.history.length > 50) state.history.shift();
+      if (state.speed > 0) state.roadOffset += state.speed * 0.03;
+
+      document.getElementById('dpf-kpa-val').textContent = state.currentKpa.toFixed(2) + ' kPa';
+      document.getElementById('dpf-temp-val').textContent = state.dpfTemp.toFixed(1) + '°C';
+      document.getElementById('maf-val').textContent = state.maf.toFixed(1) + ' g/s';
+      document.getElementById('turbo-val').textContent = state.mapKpa + ' kPa';
+      document.getElementById('rail-val').textContent = state.railBar + ' bar';
+      document.getElementById('batt-val').textContent = state.voltage.toFixed(2) + ' V';
+      document.getElementById('top-speed').textContent = state.speed + ' km/h';
+      document.getElementById('waze-rpm').textContent = state.rpm + ' rpm';
+      document.getElementById('turbo-bar').style.width = Math.min(100, Math.round((state.mapKpa / 240) * 100)) + '%';
+
+      document.getElementById('fap-status-text').textContent =
+        state.regen === 2 ? 'Régén. FAP : 2 (ACTIVE 618°C !)' : 'Régén. FAP : 0 (Inactive)';
+
+      drawDpfChart();
+      drawWazeMap();
+    }
+
+    setInterval(tick, 250);
+    tick();
+  </script>
+</body>
+</html>
