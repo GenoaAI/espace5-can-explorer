@@ -41,6 +41,22 @@ Sur les **16 calculateurs** interrogés :
   - `DPF Differential Pressure` (Pression différentielle FAP en `mbar` ou `hPa`) : au ralenti, elle doit être entre **3 et 12 mbar** (si elle reste figée à `0` ou négative, le capteur ou sa durite est HS).
   - `DPF Soot Mass` (Masse de suie en `g`) et `Distance since last DPF regeneration` (km depuis la dernière régénération).
 
+#### Trame Figée (Freeze Frame) extraite pour `P2002`
+Conditions exactes enregistrées par le calculateur Bosch `MD1CS006` au moment du déclenchement de `P2002` :
+
+| Paramètre | Valeur Mesurée | Analyse Technique |
+|---|---|---|
+| **Durée depuis démarrage moteur** | `00:27:29` (27 min 29 s) | Fenêtre de test OBD atteinte (moteur stabilisé en température) |
+| **Vitesse véhicule / Régime** | `46 km/h` @ `2 048 tr/min` | Phase de relance urbaine/périurbaine (pédale accélérateur à `33.7 %`) |
+| **Température liquide refroidissement** | `78 °C` *(Air ambiant: `10 °C`)* | Moteur chaud, air aspiré après échangeur à `30 °C` |
+| **Débit massique d'air (MAF)** | **`35.99 g/s`** | Débit d'air sain et franc déclenchant le test de contre-pression FAP |
+| **Pression absolue admission (MAP)** | `160 kPa` *(Atmo: `98 kPa`)* | `+0.62 bar` de suralimentation turbo (charge calculée `34.9 %`, absolue `139.2 %`) |
+| **Pression rampe Common Rail** | `112 300 kPa` (**`1 123 bar`**) | Haute pression gazole nominale |
+| **Vanne EGR (Spécifié / Erreur)** | `0 %` / `0 %` *(Papillon: `92.9 %`)* | EGR parfaitement fermée en demande de charge, papillon grand ouvert |
+| **Tension calculateur (UCE)** | `14.48 V` | Alternateur piloté en charge nominale |
+
+> **Conclusion de la Trame Figée** : L'ensemble de la boucle d'air (turbo, débitmètre `36 g/s`, EGR `0 %` d'erreur) et d'injection (`1 123 bar`) fonctionne de manière nominale. Le défaut `P2002` est purement lié à la mesure de contre-pression/efficacité du FAP lorsque le débit de gaz atteint `~36 g/s` à `2 048 tr/min`.
+
 ---
 
 ### B. `B272B(97) [0xA72B97]` — Aide au Stationnement (`Sonar` - `0x74E`)
